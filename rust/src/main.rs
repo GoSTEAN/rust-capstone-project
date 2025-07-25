@@ -18,20 +18,20 @@ fn create_or_load_wallet(rpc: &Client, wallet_name: &str) -> bitcoincore_rpc::Re
 
     match load_result {
         Ok(_) => {
-            println!("Wallet '{}' loaded successfully", wallet_name);
+            println!("Wallet '{wallet_name}' loaded successfully");
             Ok(())
         }
         Err(_) => {
             // If loading failed, try to create the wallet
-            println!("Wallet '{}' not found, creating new wallet", wallet_name);
+            println!("Wallet '{wallet_name}' not found, creating new wallet");
             let create_result = rpc.create_wallet(wallet_name, None, None, None, None);
             match create_result {
                 Ok(_) => {
-                    println!("Wallet '{}' created successfully", wallet_name);
+                    println!("Wallet '{wallet_name}' created successfully");
                     Ok(())
                 }
                 Err(e) => {
-                    println!("Failed to create wallet '{}': {}", wallet_name, e);
+                    println!("Failed to create wallet '{wallet_name}': {e}");
                     Err(e)
                 }
             }
@@ -41,7 +41,7 @@ fn create_or_load_wallet(rpc: &Client, wallet_name: &str) -> bitcoincore_rpc::Re
 
 // Helper function to switch to a specific wallet
 fn get_wallet_client(wallet_name: &str) -> bitcoincore_rpc::Result<Client> {
-    let wallet_url = format!("{}/wallet/{}", RPC_URL, wallet_name);
+    let wallet_url = format!("{RPC_URL}/wallet/{wallet_name}");
     Client::new(
         &wallet_url,
         Auth::UserPass(RPC_USER.to_owned(), RPC_PASS.to_owned()),
@@ -81,7 +81,7 @@ fn main() -> bitcoincore_rpc::Result<()> {
 
     // Get blockchain info
     let blockchain_info = rpc.get_blockchain_info()?;
-    println!("Blockchain Info: {:?}", blockchain_info);
+    println!("Blockchain Info: {blockchain_info:?}");
 
     // Create/Load the wallets, named 'Miner' and 'Trader'
     let miner_wallet = "Miner";
@@ -98,10 +98,7 @@ fn main() -> bitcoincore_rpc::Result<()> {
     println!("Mining blocks to generate spendable balance...");
     let mining_address = miner_client.get_new_address(Some("Mining Reward"), None)?;
     let mining_address_checked = mining_address.assume_checked();
-    println!(
-        "Generated mining address with label 'Mining Reward': {}",
-        mining_address_checked
-    );
+    println!("Generated mining address with label 'Mining Reward': {mining_address_checked}");
     let blocks = rpc.generate_to_address(101, &mining_address_checked)?;
     println!("Mined {} blocks", blocks.len());
 
@@ -112,32 +109,29 @@ fn main() -> bitcoincore_rpc::Result<()> {
     // Create a receiving address labeled "Received" from Trader wallet
     let trader_address = trader_client.get_new_address(Some("Received"), None)?;
     let trader_address_checked = trader_address.assume_checked();
-    println!(
-        "Generated trader address with label 'Received': {}",
-        trader_address_checked
-    );
+    println!("Generated trader address with label 'Received': {trader_address_checked}");
 
     // Send 20 BTC from Miner to Trader
     println!("Sending 20 BTC from Miner to Trader...");
     let txid_str = send_bitcoin(&miner_client, &trader_address_checked.to_string(), 20.0)?;
-    println!("Transaction sent with TXID: {}", txid_str);
+    println!("Transaction sent with TXID: {txid_str}");
 
     // Parse TXID using bitcoincore_rpc's bitcoin crate
     let txid = bitcoincore_rpc::bitcoin::Txid::from_str(&txid_str).map_err(|e| {
         std::io::Error::new(
             std::io::ErrorKind::InvalidData,
-            format!("Failed to parse TXID: {}", e),
+            format!("Failed to parse TXID: {e}"),
         )
     })?;
 
     // Get mempool entry
     println!("Fetching unconfirmed transaction from mempool...");
     let mempool_entry = rpc.call::<serde_json::Value>("getmempoolentry", &[json!(txid_str)])?;
-    println!("Mempool entry: {:?}", mempool_entry);
+    println!("Mempool entry: {mempool_entry:?}");
 
     // Also check general mempool info
     let mempool_info = rpc.get_mempool_info()?;
-    println!("Mempool info: {:?}", mempool_info);
+    println!("Mempool info: {mempool_info:?}");
 
     // Mine 1 block to confirm the transaction
     println!("Mining 1 block to confirm transaction...");
@@ -146,7 +140,7 @@ fn main() -> bitcoincore_rpc::Result<()> {
 
     // Extract all required transaction details
     let transaction = miner_client.get_transaction(&txid, None)?;
-    println!("Transaction details: {:?}", transaction);
+    println!("Transaction details: {transaction:?}");
 
     // Get block information
     let block_hash = transaction
@@ -239,7 +233,7 @@ fn main() -> bitcoincore_rpc::Result<()> {
 
     // Debug: Print the content we're writing to verify format
     println!("\n=== OUTPUT FILE CONTENT ===");
-    println!("{}", output_data);
+    println!("{output_data}");
     println!("============================");
 
     println!("\n=== SUMMARY ===");
