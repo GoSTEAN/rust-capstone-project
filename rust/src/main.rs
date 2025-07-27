@@ -182,16 +182,16 @@ fn main() -> bitcoincore_rpc::Result<()> {
     // Write transaction details to output file
     let output_path = Path::new("../out.txt");
     let mut file = File::create(output_path)?;
-    writeln!(file, "{}", tx_id)?;
-    writeln!(file, "{}", input_addr)?;
-    writeln!(file, "{:.8}", input_amount)?;
-    writeln!(file, "{}", trader_out_addr)?;
-    writeln!(file, "{:.8}", trader_out_amount)?;
-    writeln!(file, "{}", miner_change_addr)?;
-    writeln!(file, "{:.8}", miner_change_amount)?;
-    writeln!(file, "{:.8}", fee.abs())?;
-    writeln!(file, "{}", block_height)?;
-    writeln!(file, "{}", block_hash)?;
+    writeln!(file, "{tx_id}")?;
+    writeln!(file, "{input_addr}")?;
+    writeln!(file, "{input_amount:.8}")?;
+    writeln!(file, "{trader_out_addr}")?;
+    writeln!(file, "{trader_out_amount:.8}")?;
+    writeln!(file, "{miner_change_addr}")?;
+    writeln!(file, "{miner_change_amount:.8}")?;
+    writeln!(file, "{fee:.8}")?;
+    writeln!(file, "{block_height}")?;
+    writeln!(file, "{block_hash}")?;
     println!("Saved transaction details to ../out.txt");
 
     Ok(())
